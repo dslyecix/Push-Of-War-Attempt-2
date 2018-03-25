@@ -24,6 +24,7 @@ public class Unit : MonoBehaviour, IAttackable {
 
     public float attackCooldown;
     private float nextAttackTime;
+    Transform attackLocation;
 
     public int maximumHP;
 
@@ -41,7 +42,11 @@ public class Unit : MonoBehaviour, IAttackable {
     void Update () {
     
         if (isActive) {
-            if (!isAggro) {
+            if (isAggro) {
+                StopCoroutine(SearchForEnemies());
+                EngageEnemy();
+                
+            } else {
                 if ((currentTarget.position - this.transform.position).magnitude < 0.5)
                     UpdatePathTarget();
                 if (!flagForDeath) {
@@ -49,10 +54,7 @@ public class Unit : MonoBehaviour, IAttackable {
                     //transform.rotation = Quaternion.LookRotation(dir, Vector3.up);
                     Debug.DrawLine(transform.position, currentTarget.position,Color.green);
                 }
-                
                 else Die();
-            } else {
-                EngageEnemy();
             }
         }
 	}
@@ -67,21 +69,21 @@ public class Unit : MonoBehaviour, IAttackable {
     private void EngageEnemy()
     {
         Unit enemyUnit = enemies[0];
-        Transform enemyTransform;
+        
         if (enemyUnit) {
-            enemyTransform = enemyUnit.transform;
-            float distance = (enemyTransform.position - this.transform.position).magnitude;
-            if (distance >= attackDistance) {
-                Transform moveTransform = enemyUnit.ReturnNearestOpenAttackPos(transform.position);
-                
-                Move(moveTransform);
-                Debug.Log("Moving to " + moveTransform.name);
+            if (attackLocation == null){
+                attackLocation = enemyUnit.ReturnNearestOpenAttackPos(transform.position);
             }
-            else {
-                if (Time.time > nextAttackTime)
-                    Attack(enemyUnit);
+            float distance = (attackLocation.position - transform.position).magnitude;
+
+            if (distance > 0.2f) {
+                Move(attackLocation);
+                Debug.Log("Moving to " + attackLocation.name);
+            } else if (Time.time > nextAttackTime) {
+                Attack(enemyUnit);
             }
         } else {
+            attackLocation = null;
             isAggro = false;
             StartCoroutine(SearchForEnemies());
         }
@@ -116,7 +118,8 @@ public class Unit : MonoBehaviour, IAttackable {
         Vector3 direction = (target.position - this.transform.position).normalized;
         Vector3 moveAmount = direction * moveSpeed * Time.deltaTime;
 
-        this.transform.Translate(moveAmount);
+        this.transform.Translate(moveAmount, Space.World);
+        this.transform.rotation = Quaternion.LookRotation(direction);
         return direction.normalized;
     }
 
@@ -134,7 +137,8 @@ public class Unit : MonoBehaviour, IAttackable {
         }
     }
 
-    private IEnumerator SearchForEnemies () {
+    private IEnumerator SearchForEnemies () 
+    {
         enemies.Clear();
         bool foundSomething = false;
         while (!foundSomething) {
@@ -161,7 +165,6 @@ public class Unit : MonoBehaviour, IAttackable {
             yield return new WaitForSeconds(searchTime);
         }
         isAggro = foundSomething;
-        StopCoroutine(SearchForEnemies());
     }
 
     public void TakeDamage(int damageAmount)
@@ -180,7 +183,8 @@ public class Unit : MonoBehaviour, IAttackable {
         DestroyImmediate(this.gameObject);
     }
 
-    public Transform ReturnNearestOpenAttackPos (Vector3 position){
+    public Transform ReturnNearestOpenAttackPos (Vector3 position)
+    {
         float distance = Mathf.Infinity;
         Transform closestPosition = null;
         int runningIndex = 0;
