@@ -40,4 +40,13 @@ public class Path : MonoBehaviour {
         }
     }
 
+    public Transform GetInverseWaypoint (int index) {
+        int inverseIndex = waypoints.Count - 1 - index;
+        if (inverseIndex >= 0)
+            return waypoints[inverseIndex];
+        else {
+            Debug.Log("Error, no waypoints in list!");
+            return null;
+        }
+    }
 }
