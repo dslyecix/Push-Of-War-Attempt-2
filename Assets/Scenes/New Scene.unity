@@ -112,7 +112,7 @@ NavMeshSettings:
     accuratePlacement: 0
     debug:
       m_Flags: 0
-  m_NavMeshData: {fileID: 0}
+  m_NavMeshData: {fileID: 23800000, guid: ad37ff104155dfc498a8083cd6031957, type: 2}
 --- !u!1 &156187086
 GameObject:
   m_ObjectHideFlags: 0
@@ -212,7 +212,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 4352197782496496, guid: c93a40144f2332d4ba0e11dc594a88a7, type: 2}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4352197782496496, guid: c93a40144f2332d4ba0e11dc594a88a7, type: 2}
       propertyPath: m_LocalPosition.z
@@ -263,7 +263,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 4352197782496496, guid: c93a40144f2332d4ba0e11dc594a88a7, type: 2}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4352197782496496, guid: c93a40144f2332d4ba0e11dc594a88a7, type: 2}
       propertyPath: m_LocalPosition.z
@@ -309,7 +309,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 4352197782496496, guid: c93a40144f2332d4ba0e11dc594a88a7, type: 2}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4352197782496496, guid: c93a40144f2332d4ba0e11dc594a88a7, type: 2}
       propertyPath: m_LocalPosition.z
@@ -371,7 +371,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a01bae4ce266bb4189df7d7e4938fd8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerTwo: 1
+  currentTeam: 2
   unitList:
   - {fileID: 1403370887193532, guid: 26ddab1fb5fa69f4c88ba2e42e4ede2f, type: 2}
   selectedUnit: {fileID: 0}
@@ -425,7 +425,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 430118987}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 25, y: 1, z: -25}
+  m_LocalPosition: {x: 24, y: 2.66, z: -24}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -495,7 +495,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 4352197782496496, guid: c93a40144f2332d4ba0e11dc594a88a7, type: 2}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4352197782496496, guid: c93a40144f2332d4ba0e11dc594a88a7, type: 2}
       propertyPath: m_LocalPosition.z
@@ -541,7 +541,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 4352197782496496, guid: c93a40144f2332d4ba0e11dc594a88a7, type: 2}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4352197782496496, guid: c93a40144f2332d4ba0e11dc594a88a7, type: 2}
       propertyPath: m_LocalPosition.z
@@ -587,7 +587,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 4352197782496496, guid: c93a40144f2332d4ba0e11dc594a88a7, type: 2}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4352197782496496, guid: c93a40144f2332d4ba0e11dc594a88a7, type: 2}
       propertyPath: m_LocalPosition.z
@@ -633,7 +633,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 4352197782496496, guid: c93a40144f2332d4ba0e11dc594a88a7, type: 2}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4352197782496496, guid: c93a40144f2332d4ba0e11dc594a88a7, type: 2}
       propertyPath: m_LocalPosition.z
@@ -689,7 +689,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 4352197782496496, guid: c93a40144f2332d4ba0e11dc594a88a7, type: 2}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4352197782496496, guid: c93a40144f2332d4ba0e11dc594a88a7, type: 2}
       propertyPath: m_LocalPosition.z
@@ -735,7 +735,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 4352197782496496, guid: c93a40144f2332d4ba0e11dc594a88a7, type: 2}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4352197782496496, guid: c93a40144f2332d4ba0e11dc594a88a7, type: 2}
       propertyPath: m_LocalPosition.z
@@ -968,7 +968,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 4352197782496496, guid: c93a40144f2332d4ba0e11dc594a88a7, type: 2}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4352197782496496, guid: c93a40144f2332d4ba0e11dc594a88a7, type: 2}
       propertyPath: m_LocalPosition.z
@@ -1035,7 +1035,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 4352197782496496, guid: c93a40144f2332d4ba0e11dc594a88a7, type: 2}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4352197782496496, guid: c93a40144f2332d4ba0e11dc594a88a7, type: 2}
       propertyPath: m_LocalPosition.z
@@ -1209,9 +1209,9 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 2086474663}
-  - component: {fileID: 2086474662}
   - component: {fileID: 2086474665}
   - component: {fileID: 2086474664}
+  - component: {fileID: 2086474662}
   m_Layer: 9
   m_Name: UnitSpawnerP1
   m_TagString: Untagged
@@ -1230,7 +1230,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a01bae4ce266bb4189df7d7e4938fd8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerTwo: 0
+  currentTeam: 1
   unitList:
   - {fileID: 1403370887193532, guid: 26ddab1fb5fa69f4c88ba2e42e4ede2f, type: 2}
   selectedUnit: {fileID: 0}
@@ -1242,7 +1242,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 2086474661}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -25, y: 1, z: 25}
+  m_LocalPosition: {x: -24, y: 2.66, z: 24}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -1306,7 +1306,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 8
   m_IsActive: 1
 --- !u!64 &2089607043
 MeshCollider:

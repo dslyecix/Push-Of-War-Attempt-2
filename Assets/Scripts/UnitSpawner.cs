@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class UnitSpawner : MonoBehaviour {
 
-    public bool playerTwo;
+    public Unit.Team currentTeam;
     public List<GameObject> unitList;
     public GameObject selectedUnit;
     public Path selectedPath;
@@ -25,19 +25,18 @@ public class UnitSpawner : MonoBehaviour {
     private void SpawnUnit()
     {
         GameObject unitGO = Instantiate(selectedUnit,this.transform.position, Quaternion.identity);
-        if (playerTwo) {
-            unitGO.name = "Player Two unit " + (spawnedUnitCounter + 1);
+        if (currentTeam == Unit.Team.TeamTwo) {
+            unitGO.name = "P2 unit " + (spawnedUnitCounter + 1);
             unitGO.layer = LayerMask.NameToLayer("PlayerTwo");
         } else {
-            unitGO.name = "Player One unit " + (spawnedUnitCounter + 1);
+            unitGO.name = "P1 unit " + (spawnedUnitCounter + 1);
             unitGO.layer = LayerMask.NameToLayer("PlayerOne");
         }
         spawnedUnitCounter ++;
         Unit unit = unitGO.GetComponent<Unit>();
-        unit.SetAllegiance(playerTwo);
+        unit.SetTeam(currentTeam);
         unit.SetCurrentPath(selectedPath);
 
-        unit.isActive = true;
-
+        unit.currentState = Unit.UnitState.OnPath;
     }
 }

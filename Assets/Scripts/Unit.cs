@@ -2,97 +2,161 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
-public class Unit : MonoBehaviour, IAttackable {
+public class Unit : MonoBehaviour {
 
+    public UnitState currentState;
+    public enum UnitState
+    {
+        Inactive, OnPath, InCombat
+    }   
 
+    public Team currentTeam;
+    public enum Team {
+        NoTeam, TeamOne, TeamTwo
+    }
+
+    [Header("Health stuff")]
+    public int maximumHP;
     private int currentHP;
-    private bool playerTwo;
+    
+    [Header("Combat stuff")]
+    public float aggroRadius;
+    public int attackDamage;
+    public float attackDistance;
+    public float attackCooldown;
+    private float nextAttackTime;
+    private bool lookingForEnemies;
+    private LayerMask enemyLayer;
+    public float searchTime;
+    Transform attackLocation;
+
+    [Header("Pathfinding stuff")]
     private Path currentPath;
     private int waypointIndex;
     private Transform currentTarget;
-    private bool flagForDeath = false;
-    public float aggroRadius;
-    public LayerMask enemyMask;
-    private bool isAggro;
+    private bool pathCompleted = false;
 
-    public bool isActive = false;
-    public float moveSpeed;
-    public float attackDistance;
-    public int attackDamage;
-    public float searchTime;
-
-    public float attackCooldown;
-    private float nextAttackTime;
-    Transform attackLocation;
-
-    public int maximumHP;
 
     public List<Unit> enemies;
+    private AttackSlotManager attackSlotManager;
+    private NavMeshAgent navAgent;
 
-    public Transform attackSlotParent;
+    bool drawAggro = false;
+    bool drawAttack = false;
+
+    //Animator animator;
+    //public Animation attackAnimation;
+
+    void Awake () 
+    {
+        currentState = UnitState.Inactive;
+        attackSlotManager = GetComponent<AttackSlotManager>();
+        navAgent = GetComponent<NavMeshAgent>();
+        //animator = GetComponent<Animator>();
+    }
 
     void Start ()
     {
+        Initialize();   
+    }
+
+    private void Initialize()
+    {
         waypointIndex = 0;
         currentHP = maximumHP;
-        StartCoroutine(SearchForEnemies());
     }
 
     void Update () {
-    
-        if (isActive) {
-            if (isAggro) {
-                StopCoroutine(SearchForEnemies());
-                EngageEnemy();
-                
-            } else {
-                if ((currentTarget.position - this.transform.position).magnitude < 0.5)
-                    UpdatePathTarget();
-                if (!flagForDeath) {
-                    Move(currentTarget);
-                    //transform.rotation = Quaternion.LookRotation(dir, Vector3.up);
-                    Debug.DrawLine(transform.position, currentTarget.position,Color.green);
+        switch (currentState)
+        {
+            case UnitState.Inactive:
+                Debug.Log(name + " is inactive!");
+                break;
+
+            case UnitState.OnPath:
+                drawAggro = true;
+                drawAttack = false;
+                // If we aren't already scanning for enemies, begin
+                ActivateEnemySearch();
+
+                // Check if new waypoint is required from path
+                EvaluateWaypointDistance();
+
+                if (pathCompleted)
+                {
+                    Die(); //TODO: Don't just die when you run out of path
+                    break;
                 }
-                else Die();
-            }
+                
+                // Nothing else to do, move along path.
+                navAgent.destination = currentTarget.position;
+                break;
+
+            case UnitState.InCombat:
+                drawAggro = false;
+                drawAttack = true;
+                // An enemy was detected.  Determine what to do.
+                EngageEnemy();
+                break;
+
+            default:
+                Debug.Log("Unit is not in a valid state!");
+                break;
         }
 	}
 
-    void OnDrawGizmos() {
-        Gizmos.color = Color.red * 0.5f;
-        Gizmos.DrawWireSphere(this.transform.position, aggroRadius);
-        Gizmos.color = Color.green  * 0.5f;
-        Gizmos.DrawWireSphere(this.transform.position, attackDistance);
+    private void EvaluateWaypointDistance()
+    {
+        if ((currentTarget.position - this.transform.position).magnitude < 0.5)
+            UpdatePathTarget();
     }
+
+    private void ActivateEnemySearch()
+    {
+        if (!lookingForEnemies)
+        {
+            lookingForEnemies = true;
+            Debug.Log("Starting enemy search!");
+            StartCoroutine(SearchForEnemies());
+        }
+    }
+
 
     private void EngageEnemy()
     {
         Unit enemyUnit = enemies[0];
         
         if (enemyUnit) {
-            if (attackLocation == null){
-                attackLocation = enemyUnit.ReturnNearestOpenAttackPos(transform.position);
-            }
-            float distance = (attackLocation.position - transform.position).magnitude;
+            
+            float distance = (enemyUnit.transform.position - transform.position).magnitude;
 
-            if (distance > 0.2f) {
-                Move(attackLocation);
-                Debug.Log("Moving to " + attackLocation.name);
-            } else if (Time.time > nextAttackTime) {
+
+            if (distance >= attackDistance) {
+                navAgent.enabled = true;
+                if (attackLocation == null){
+                    attackLocation = enemyUnit.attackSlotManager.ReturnNearestOpenAttackSlot(transform);
+                }
+                navAgent.destination = attackLocation.position;
+            } else {
+                navAgent.enabled = false;
                 Attack(enemyUnit);
             }
         } else {
             attackLocation = null;
-            isAggro = false;
-            StartCoroutine(SearchForEnemies());
+            navAgent.enabled = true;
+            currentState = UnitState.OnPath;
         }
     }
 
     private void Attack(Unit enemyUnit)
     {   
-        nextAttackTime = Time.time + attackCooldown;
-        enemyUnit.TakeDamage(attackDamage);
+        if (Time.time > nextAttackTime) {
+            //animator.Play("AttackAnimation");
+            nextAttackTime = Time.time + attackCooldown;
+            enemyUnit.TakeDamage(attackDamage);
+        }
     }
 
     public void SetCurrentPath (Path path){
@@ -104,67 +168,67 @@ public class Unit : MonoBehaviour, IAttackable {
 
     private void UpdatePathTarget()
     {
-        if (playerTwo) 
+        if (currentTeam == Team.TeamTwo) 
             currentTarget = currentPath.GetInverseWaypoint(waypointIndex);
         else
             currentTarget = currentPath.GetWaypoint(waypointIndex);
         if (currentTarget != null) 
             waypointIndex ++;
         else 
-            flagForDeath = true;
+            pathCompleted = true;
     }
 
-    private Vector3 Move (Transform target) {
-        Vector3 direction = (target.position - this.transform.position).normalized;
-        Vector3 moveAmount = direction * moveSpeed * Time.deltaTime;
+    // OLD MOVE METHOD, PRIOR TO NAVMESHAGENT IMPLEMENTATION
+    // private void Move (Transform target) {
+    //     Vector3 direction = (target.position - this.transform.position).normalized;
+    //     Vector3 moveAmount = direction * moveSpeed * Time.deltaTime;
 
-        this.transform.Translate(moveAmount, Space.World);
-        this.transform.rotation = Quaternion.LookRotation(direction);
-        return direction.normalized;
-    }
+    //     this.transform.Translate(moveAmount, Space.World);
+    //     this.transform.rotation = Quaternion.LookRotation(direction);
+    // }
 
-    public void SetAllegiance (bool P2) {
-        playerTwo = P2;
-        enemyMask = new LayerMask();
+    public void SetTeam (Team team) {
+        currentTeam = team;
+        enemyLayer = new LayerMask();
         MeshRenderer renderer = GetComponent<MeshRenderer>();
-        if (P2) {
+        if (currentTeam == Team.TeamOne) {
             renderer.material.color = Color.red;
-            enemyMask.value = 1 << LayerMask.NameToLayer("PlayerOne");
+            enemyLayer.value = 1 << LayerMask.NameToLayer("PlayerTwo");
+            //this.gameObject.layer = LayerMask.NameToLayer(Team.TeamTwo.ToString());
         }
         else {
             renderer.material.color = Color.blue;
-            enemyMask.value = 1 << LayerMask.NameToLayer("PlayerTwo");
+            enemyLayer.value = 1 << LayerMask.NameToLayer("PlayerOne");
+            //this.gameObject.layer = LayerMask.NameToLayer(Team.TeamOne.ToString());
+
         }
     }
 
     private IEnumerator SearchForEnemies () 
     {
-        enemies.Clear();
+        Debug.Log("Starting Search Coroutine");
         bool foundSomething = false;
         while (!foundSomething) {
-            Collider[] sphereHits = Physics.OverlapSphere(transform.position, aggroRadius, enemyMask);
-            Debug.Log(sphereHits.Length);
+            Debug.Log(name + "'s coroutine while loop");
+            enemies.Clear();
+            Collider[] sphereHits = Physics.OverlapSphere(transform.position, aggroRadius, enemyLayer);
+
             for (int i = 0; i < sphereHits.Length; i++)
             {
                 Unit hitUnit = sphereHits[i].gameObject.GetComponent<Unit>();
                 if (hitUnit) {
-                    if (!playerTwo) {
-                        if (hitUnit.playerTwo){
-                            
-                            foundSomething = true;
-                            enemies.Add(hitUnit);
-                        }
-                    } else {
-                        if (!hitUnit.playerTwo){
-                            enemies.Add(hitUnit);
-                            foundSomething = true;
-                        }
-                    }  
+                    if (hitUnit.currentTeam != currentTeam) {
+                        foundSomething = true;
+                        enemies.Add(hitUnit);
+                    } 
                 }
             }
             yield return new WaitForSeconds(searchTime);
         }
-        isAggro = foundSomething;
+
+        lookingForEnemies = false;
+        currentState = UnitState.InCombat;
+        yield break;
     }
 
     public void TakeDamage(int damageAmount)
@@ -181,54 +245,17 @@ public class Unit : MonoBehaviour, IAttackable {
         Debug.Log(name + " has died!");
         StopAllCoroutines();
         DestroyImmediate(this.gameObject);
+    }   
+    
+    void OnDrawGizmos() {
+        if (drawAggro) {
+            Gizmos.color = Color.red * 0.5f;
+            Gizmos.DrawWireSphere(this.transform.position, aggroRadius);
+        }
+        if (drawAttack) {
+            Gizmos.color = Color.green  * 0.5f;
+            Gizmos.DrawWireSphere(this.transform.position, attackDistance);
+        }
     }
 
-    public Transform ReturnNearestOpenAttackPos (Vector3 position)
-    {
-        float distance = Mathf.Infinity;
-        Transform closestPosition = null;
-        int runningIndex = 0;
-        Debug.Log("Status before:");
-        for (int i = 0; i < attackSlotParent.childCount; i++)
-        {
-            Debug.Log(attackSlotParent.GetChild(i).name + attackSlotParent.GetChild(i).GetComponent<AttackSlot>().isOpen);
-        }
-
-        //For each child of the attack slot holder
-        for (int i = 0; i < attackSlotParent.childCount; i++)
-        {
-            Transform child = attackSlotParent.GetChild(i);
-            //If the slot is open
-            if (child.GetComponent<AttackSlot>().isOpen){
-                float currentDistance = (child.position - position).magnitude;
-                //And closer than the existing current distance
-                if (currentDistance < distance) {
-                    distance = currentDistance;
-                    runningIndex = i;
-                }
-            }
-        }
-        
-        closestPosition = attackSlotParent.GetChild(runningIndex);
-        Debug.Log("Closest position is " + closestPosition.name);
-        Debug.Log("Setting " + closestPosition.name + " bool to false");
-        closestPosition.GetComponent<AttackSlot>().isOpen = false;
-        Debug.Log("Status after:");
-        for (int i = 0; i < attackSlotParent.childCount; i++)
-        {
-            Debug.Log(attackSlotParent.GetChild(i).name + attackSlotParent.GetChild(i).GetComponent<AttackSlot>().isOpen);
-        }
-        
-        return closestPosition;
-    }
-
-    // private void SetAttackPositions() {
-    //     float angle = 360f / (transform.childCount + 1);
-
-    //     for (int i = 0; i < transform.childCount; i++)
-    //     {
-    //         Vector3 currentPosition = this.transform.position + new Vector3(Mathf.Cos(i * angle) * 0.75f * attackDistance, 0, Mathf.Sin(i * angle) * 0.75f * attackDistance);
-    //         transform.GetChild(i).position = currentPosition;
-    //     }
-    // }
 }
