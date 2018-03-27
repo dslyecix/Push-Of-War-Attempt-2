@@ -46,7 +46,7 @@ public class Unit : MonoBehaviour {
     bool drawAggro = false;
     bool drawAttack = false;
 
-    //Animator animator;
+    Animator animator;
     //public Animation attackAnimation;
 
     void Awake () 
@@ -54,7 +54,7 @@ public class Unit : MonoBehaviour {
         currentState = UnitState.Inactive;
         attackSlotManager = GetComponent<AttackSlotManager>();
         navAgent = GetComponent<NavMeshAgent>();
-        //animator = GetComponent<Animator>();
+        animator = GetComponent<Animator>();
     }
 
     void Start ()
@@ -153,7 +153,7 @@ public class Unit : MonoBehaviour {
     private void Attack(Unit enemyUnit)
     {   
         if (Time.time > nextAttackTime) {
-            //animator.Play("AttackAnimation");
+            animator.SetTrigger("AttackTrigger");
             nextAttackTime = Time.time + attackCooldown;
             enemyUnit.TakeDamage(attackDamage);
         }
